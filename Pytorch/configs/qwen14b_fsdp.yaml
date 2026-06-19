@@ -1,1 +1,159 @@
+# ==========================================
+# Experiment Configuration
+# ==========================================
 
+experiment_name: qwen25_14b_ultrachat_fsdp
+seed: 42
+output_dir: ./outputs/qwen25_14b_fsdp
+
+
+# ==========================================
+# Model Configuration
+# ==========================================
+
+model:
+  name: Qwen/Qwen2.5-14B-Instruct
+  trust_remote_code: true
+  dtype: bfloat16
+
+  flash_attention: true
+  liger_kernel: true
+  gradient_checkpointing: true
+  torch_compile: false
+
+
+# ==========================================
+# Dataset Configuration
+# ==========================================
+
+dataset:
+  name: HuggingFaceH4/ultrachat_200k
+  split: train_sft
+  max_seq_length: 2048
+  preprocessing_workers: 8
+  packing: false
+
+
+# ==========================================
+# DataLoader Configuration
+# ==========================================
+
+dataloader:
+  batch_size: 1
+  gradient_accumulation_steps: 16
+  num_workers: 8
+  pin_memory: true
+  drop_last: true
+
+
+# ==========================================
+# Optimizer
+# ==========================================
+
+optimizer:
+  name: AdamW
+  learning_rate: 2e-5
+  weight_decay: 0.1
+  betas: [0.9, 0.95]
+  eps: 1e-8
+
+
+# ==========================================
+# Learning Rate Scheduler
+# ==========================================
+
+scheduler:
+  name: cosine
+  warmup_ratio: 0.03
+
+
+# ==========================================
+# Training
+# ==========================================
+
+training:
+  epochs: 3
+  max_grad_norm: 1.0
+  bf16: true
+  fp16: false
+
+
+# ==========================================
+# Distributed Training
+# ==========================================
+
+distributed:
+  backend: nccl
+  strategy: fsdp
+
+
+# ==========================================
+# FSDP Configuration
+# ==========================================
+
+fsdp:
+  sharding_strategy: FULL_SHARD
+  mixed_precision: true
+  use_orig_params: true
+  sync_module_states: true
+  forward_prefetch: false
+  limit_all_gathers: true
+  cpu_offload: false
+
+  auto_wrap_policy: transformer
+
+  activation_checkpointing: true
+
+  state_dict_type: full
+
+
+# ==========================================
+# Checkpointing
+# ==========================================
+
+checkpoint:
+  save_dir: ./checkpoints
+  save_every: 1000
+  keep_last: 3
+  resume: null
+
+
+# ==========================================
+# Logging
+# ==========================================
+
+logging:
+  log_every: 10
+  log_file: train.log
+
+  metrics:
+    - loss
+    - learning_rate
+    - grad_norm
+    - tokens_per_second
+    - gpu_utilization
+    - gpu_memory
+    - cpu_memory
+    - step_time
+    - epoch_time
+    - mfu
+
+
+# ==========================================
+# MLflow
+# ==========================================
+
+mlflow:
+  enabled: true
+  experiment: qwen25_fsdp
+  run_name: ultrachat_run
+
+
+# ==========================================
+# Evaluation
+# ==========================================
+
+evaluation:
+  enabled: true
+  eval_every: 1000
+  batch_size: 1
