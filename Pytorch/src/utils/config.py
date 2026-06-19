@@ -49,7 +49,7 @@ def load_config(config_path: str) -> dict:
 
 
 def validate_config(config: dict) -> None:
-    """
+    """ 
     Validate mandatory configuration fields.
     """
 
